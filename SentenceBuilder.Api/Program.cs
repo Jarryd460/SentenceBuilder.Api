@@ -1,4 +1,6 @@
+using HealthChecks.UI.Client;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -7,6 +9,8 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services
@@ -70,6 +74,14 @@ if (app.Environment.IsDevelopment())
         options.DisplayRequestDuration();
     });
 }
+
+app.MapHealthChecks("/healthcheck", new HealthCheckOptions
+{
+    // Formats the response such that the UI can understand
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+// Add UI for health checks json
+app.MapHealthChecksUI();
 
 app.UseHttpsRedirection();
 
