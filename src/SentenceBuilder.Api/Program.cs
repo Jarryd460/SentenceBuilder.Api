@@ -1,4 +1,5 @@
 using HealthChecks.UI.Client;
+using Hellang.Middleware.ProblemDetails;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
@@ -17,7 +18,15 @@ builder.Services.AddHealthChecks()
 builder.Services.AddHealthChecksUI()
     .AddInMemoryStorage();
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services
+    // The ApiController attribute on all controllers formats helper responses such as NotFound, Ok, BadRequest to a ProblemDetails object
+    // which follows the standard for http responses (IETF RFC 7807) however unhandled exceptions are not automatically formatted.
+    // Using the library Hellang.Middleware.ProblemDetails formats unhandled exceptions as well
+    .AddProblemDetails(options =>
+    {
+        options.IncludeExceptionDetails = (context, exception) => context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment();
+    })
+    .AddEndpointsApiExplorer();
 builder.Services
     .AddSwaggerGen(options =>
     {
@@ -65,6 +74,8 @@ builder.Services
     .AddSwaggerExamplesFromAssemblyOf<Program>();
 
 var app = builder.Build();
+
+app.UseProblemDetails();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
