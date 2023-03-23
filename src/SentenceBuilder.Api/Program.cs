@@ -2,6 +2,8 @@ using HealthChecks.UI.Client;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
+using SentenceBuilder.Api;
+using SentenceBuilder.Api.HealthChecks;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -9,8 +11,11 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddHealthChecks();
-builder.Services.AddHealthChecksUI().AddInMemoryStorage();
+builder.Services.AddWebUIServices();
+builder.Services.AddHealthChecks()
+    .AddCheck<ApiHealthCheck>(nameof(ApiHealthCheck));
+builder.Services.AddHealthChecksUI()
+    .AddInMemoryStorage();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services
