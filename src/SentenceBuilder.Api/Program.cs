@@ -1,10 +1,14 @@
+using Application;
 using HealthChecks.UI.Client;
+using HealthChecks.UI.Data;
 using Hellang.Middleware.ProblemDetails;
+using Infrastructure;
+using Infrastructure.Persistence;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SentenceBuilder.Api;
-using SentenceBuilder.Api.HealthChecks;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -12,11 +16,10 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddWebUIServices();
-builder.Services.AddHealthChecks()
-    .AddCheck<ApiHealthCheck>(nameof(ApiHealthCheck));
-builder.Services.AddHealthChecksUI()
-    .AddInMemoryStorage();
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddWebUIServices(builder.Configuration);
+
 builder.Services.AddControllers();
 builder.Services
     // The ApiController attribute on all controllers formats helper responses such as NotFound, Ok, BadRequest to a ProblemDetails object
@@ -89,6 +92,22 @@ if (app.Environment.IsDevelopment())
         // As the method suggests, displays the duration of the request
         options.DisplayRequestDuration();
     });
+
+    app.UseMigrationsEndPoint();
+
+    // Initialise and seed database
+    using (var scope = app.Services.CreateScope())
+    {
+        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        await initialiser.InitialiseAsync().ConfigureAwait(false);
+        await initialiser.SeedAsync().ConfigureAwait(false);
+    }
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var healthChecksDb = scope.ServiceProvider.GetRequiredService<HealthChecksDb>();
+        healthChecksDb.Database.Migrate();
+    }
 }
 
 app.MapHealthChecks("/healthcheck", new HealthCheckOptions
