@@ -13,7 +13,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [GitHubActions(
     "SentenceBuilder.Api",
-    GitHubActionsImage.UbuntuLatest,
+    GitHubActionsImage.WindowsLatest,
     InvokedTargets = new[] { "Compile" },
     OnPushBranches = new[] { "main" },
     OnPullRequestBranches = new[] { "main" },
