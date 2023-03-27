@@ -1,33 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>cb1828dc-4fca-4aa6-84f8-df90b21cd10f</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>cb1828dc-4fca-4aa6-84f8-df90b21cd10f</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.0-rc2.7" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.0.0-rc2.7" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="7.0.0-rc2.7" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI.SQLite.Storage" Version="7.0.0-rc2.7" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
-    <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
-    <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="5.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.0-rc2.7" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.0.0-rc2.7" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="7.0.0-rc2.7" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.SQLite.Storage" Version="7.0.0-rc2.7" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
+		<PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
+		<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="5.7.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
-    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Application\Application.csproj" />
+		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+	</ItemGroup>
+
+	<Target Name="GenerateSwaggerDocument" AfterTargets="Build">
+		<Exec Command="dotnet tool restore" />
+		<!-- Check if swagger is installed -->
+		<Exec Command="swagger" IgnoreExitCode="true" ContinueOnError="true">
+			<!-- Returns 9009 when not installed and 1 when already installed -->
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<!-- Install when not installed -->
+		<Exec Condition="'$(ErrorCode)' != '1'" Command="dotnet tool install Swashbuckle.AspNetCore.Cli --global">
+			<!-- Returns 1 when tool does not exist and 0 when successfully installed -->
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<!-- $(ProjectDir) -->
+		<Exec Condition="'$(ErrorCode)' == '0' or '$(ErrorCode)' == '1'" Command="swagger tofile --output $(OutputPath)swagger.json $(OutputPath)$(AssemblyName).dll v1" />
+	</Target>
+
+	<Target Name="GenerateSDK" AfterTargets="GenerateSwaggerDocument">
+		<Exec Command="node --version" ContinueOnError="true">
+			<!-- Returns 1 when not installed and 0 when already installed -->
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+		<Exec Command="openapi-generator-cli version" ContinueOnError="true">
+			<!-- Returns 9009 when not installed and 0 when already installed -->
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Exec Condition="'$(ErrorCode)' != '0'" Command="npm install @openapitools/openapi-generator-cli -g">
+			<!-- Returns 1 when tool does not exist and 0 when successfully installed -->
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Exec Command="openapi-generator-cli generate -i $(OutputPath)swagger.json -g typescript-angular -o $(SolutionDir)/src/SentenceBuilder.Api.Client.Sdk.TypescriptAngular --additional-properties packageName=SentenceBuilder.Api.Client.Sdk.TypescriptAngular,npmName=SentenceBuilder.Api.Client.Sdk.TypescriptAngular" />
+	</Target>
 
 </Project>
