@@ -2,9 +2,9 @@
 using Swashbuckle.AspNetCore.Filters;
 using System.Net;
 
-namespace SentenceBuilder.Api.SwaggerExamples.WordTypes;
+namespace SentenceBuilder.Api.SwaggerExamples.Words;
 
-public class WordTypesInternalServerErrorResponseExample : IExamplesProvider<ProblemDetails>
+public class WordsInternalServerErrorResponseExample : IExamplesProvider<ProblemDetails>
 {
     public ProblemDetails GetExamples()
     {
@@ -21,20 +21,20 @@ public class WordTypesInternalServerErrorResponseExample : IExamplesProvider<Pro
                 new {
                     Message = "Something unexpected happened",
                     Type = "System.Exception",
-                    Raw = "System.Exception: Something unexpected happened\r\n   at SentenceBuilder.Api.Controllers.WordTypesController.GetWordTypes....",
+                    Raw = "System.Exception: Something unexpected happened\r\n   at SentenceBuilder.Api.Controllers.WordsController.GetWords....",
                     StackFrames = new List<object>()
                     {
                         new {
-                            FilePath = "C:\\Users\\jdeane\\source\\repos\\SentenceBuilder.Api\\SentenceBuilder.Api\\Controllers\\WordTypesController.cs",
-                            FileName = "WordTypesController.cs",
-                            Function = "SentenceBuilder.Api.Controllers.WordTypesController.GetWordTypes(CancellationToken cancellationToken)",
+                            FilePath = "C:\\Users\\jdeane\\source\\repos\\SentenceBuilder.Api\\SentenceBuilder.Api\\Controllers\\WordsController.cs",
+                            FileName = "WordsController.cs",
+                            Function = "SentenceBuilder.Api.Controllers.WordsController.GetWords(CancellationToken cancellationToken)",
                             Line = 27,
                             PreContextLine = 23,
                             PreContextCode = new List<string>()
                             {
                                 "        [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]",
-                                "        [SwaggerResponseExample((int)HttpStatusCode.InternalServerError, typeof(InternalServerErrorResponseExample))]",
-                                "        public async Task<ActionResult<IEnumerable<WordTypesDto>>> GetWordTypes(CancellationToken cancellationToken)",
+                                "        [SwaggerResponseExample((int)HttpStatusCode.InternalServerError, typeof(WordsInternalServerErrorResponseExample))]",
+                                "        public async Task<ActionResult<IEnumerable<WordsDto>>> GetWords([FromQuery] WordTypeEnum wordTypeId, CancellationToken cancellationToken)",
                                 "        {"
                             },
                             ContextCode = new List<string>()
@@ -43,7 +43,10 @@ public class WordTypesInternalServerErrorResponseExample : IExamplesProvider<Pro
                             },
                             PostContextCode = new List<string>()
                             {
-                                "            return await Mediator.Send(new GetWordTypesQuery(), cancellationToken).ConfigureAwait(false);",
+                                "            return await Mediator.Send(new GetWordsQuery()",
+                                "            {",
+                                "                    WordTypeId = wordTypeId",
+                                "            }, cancellationToken).ConfigureAwait(false);",
                                 "        }",
                                 "",
                                 "        /// <summary>"

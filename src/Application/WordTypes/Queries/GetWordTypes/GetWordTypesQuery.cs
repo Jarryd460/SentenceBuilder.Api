@@ -27,6 +27,6 @@ public class GetWordTypesQueryHandler : IRequestHandler<GetWordTypesQuery, List<
             .AsNoTracking()
             .ProjectTo<WordTypeDto>(_mapper.ConfigurationProvider)
             .OrderBy(wordType => wordType.Value)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 }
