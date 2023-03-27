@@ -6,11 +6,14 @@ using Infrastructure;
 using Infrastructure.Persistence;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SentenceBuilder.Api;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Net.Mime;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +23,48 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebUIServices(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Sets all endpoints to accept and produce only json (application/json)
+    // The default formatter options.InputFormatters[0] (SystemTextJsonInputFormatter) still supports application/*.json and text/json by default
+    options.Filters.Add(new ProducesAttribute(MediaTypeNames.Application.Json));
+    options.Filters.Add(new ConsumesAttribute(MediaTypeNames.Application.Json));
+
+    // Find all the input json formatters (formatters for handling request/body data)
+    var jsonInputFormatters = options.InputFormatters.Where(formatter => formatter.GetType() == typeof(SystemTextJsonInputFormatter));
+    // Get the supported media types of the json formatters
+    var jsonInputSupportedMediaTypes = jsonInputFormatters.Select(formatter => ((SystemTextJsonInputFormatter)formatter).SupportedMediaTypes);
+
+    foreach (MediaTypeCollection supportedMediaType in jsonInputSupportedMediaTypes)
+    {
+        // Remove text/json and application/*+json as it is not allowed as part of the request body
+        // text/json is automatically not allowed without removing it but application/*+json is not and requires it's removal
+        // application/*+json comes up as a option when specifying the request body content type
+        supportedMediaType.Remove("text/json");
+        supportedMediaType.Remove("application/*+json");
+    }
+
+    // Remove the unnecessary formatters because we only need formatter for application/json
+    options.OutputFormatters.RemoveType<StringOutputFormatter>();
+
+    // Find all the output json formatters (formatters for handling response/body data)
+    var jsonOutputFormatters = options.OutputFormatters.Where(formatter => formatter.GetType() == typeof(SystemTextJsonOutputFormatter));
+    // Get the supported media types of the json formatters
+    var jsonOutputSupportedMediaTypes = jsonOutputFormatters.Select(formatter => ((SystemTextJsonOutputFormatter)formatter).SupportedMediaTypes);
+
+    foreach (MediaTypeCollection supportedMediaType in jsonOutputSupportedMediaTypes)
+    {
+        // Remove text/json and application/*+json as it is not allowed as part of the response body
+        // Having ProducesAttribute added as a filter does not require the removal of text/json and application/*+json as media types but
+        // to be consistent, it's best to remove it
+        supportedMediaType.Remove("text/json");
+        supportedMediaType.Remove("application/*+json");
+        supportedMediaType.Add("application/problem+json");
+    }
+
+    // Returns a 406 Http status code if requested content type (accept header) is not application/json
+    options.ReturnHttpNotAcceptable = true;
+});
 builder.Services
     // The ApiController attribute on all controllers formats helper responses such as NotFound, Ok, BadRequest to a ProblemDetails object
     // which follows the standard for http responses (IETF RFC 7807) however unhandled exceptions are not automatically formatted.
@@ -67,6 +111,10 @@ builder.Services
         options.UseAllOfForInheritance();
 
         // Generate and use xml comments to enhance the swagger/Open API documentation
+        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Application.xml"));
+        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Domain.xml"));
+        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Infrastructure.xml"));
+
         var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     })

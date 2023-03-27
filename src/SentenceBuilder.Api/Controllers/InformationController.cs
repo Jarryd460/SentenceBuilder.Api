@@ -1,15 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
+﻿using Application.Information.Queries.GetApiVersion;
+using Application.Information.Queries.GetVersion;
+using Microsoft.AspNetCore.Mvc;
+using SentenceBuilder.Api.SwaggerExamples.Information;
+using Swashbuckle.AspNetCore.Filters;
+using System.Net;
 
 namespace SentenceBuilder.Api.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
-public class InformationController : ControllerBase
+[ApiController]
+public class InformationController : ApiControllerBase
 {
+    /// <summary>
+    /// Gets Api version
+    /// </summary>
+    /// <response code="200">Returns Api version</response>
+    /// <response code="500">When something unexpected has happened</response>
+    /// <param name="cancellationToken"></param>
     [HttpGet("version", Name = nameof(GetVersion))]
-    public ActionResult GetVersion()
+    [ProducesResponseType(typeof(ApiVersionDto), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
+    [SwaggerResponseExample((int)HttpStatusCode.InternalServerError, typeof(VersionInternalServerErrorResponseExample))]
+    public async Task<ActionResult<ApiVersionDto>> GetVersion(CancellationToken cancellationToken)
     {
-        return Ok(Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion);
+        return await Mediator.Send(new GetApiVersionQuery(), cancellationToken).ConfigureAwait(false);
     }
 }
