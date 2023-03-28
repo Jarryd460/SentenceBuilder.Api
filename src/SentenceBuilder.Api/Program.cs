@@ -126,6 +126,8 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseCors("CorsPolicy");
+
 app.UseProblemDetails();
 
 // Configure the HTTP request pipeline.

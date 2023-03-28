@@ -10,6 +10,14 @@ internal static class ConfigureServices
 {
     public static IServiceCollection AddWebUIServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy",
+                builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+        });
+
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         services.AddHttpContextAccessor();
 
