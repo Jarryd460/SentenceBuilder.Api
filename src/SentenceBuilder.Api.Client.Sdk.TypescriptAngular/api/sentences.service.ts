@@ -157,9 +157,9 @@ export class SentencesService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<CreateSentenceDto>;
-    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpResponse<CreateSentenceDto>>;
-    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpEvent<CreateSentenceDto>>;
+    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<SentenceDto>;
+    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpResponse<SentenceDto>>;
+    public postSentence(createSentenceDto: CreateSentenceDto, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpEvent<SentenceDto>>;
     public postSentence(createSentenceDto: CreateSentenceDto, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<any> {
         if (createSentenceDto === null || createSentenceDto === undefined) {
             throw new Error('Required parameter createSentenceDto was null or undefined when calling postSentence.');
@@ -207,7 +207,7 @@ export class SentencesService {
         }
 
         let localVarPath = `/api/Sentences`;
-        return this.httpClient.request<CreateSentenceDto>('post', `${this.configuration.basePath}${localVarPath}`,
+        return this.httpClient.request<SentenceDto>('post', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: createSentenceDto,
