@@ -3,6 +3,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using SentenceBuilder.Api.SwaggerExamples.Words;
 using Swashbuckle.AspNetCore.Filters;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace SentenceBuilder.Api.Controllers
@@ -22,7 +23,7 @@ namespace SentenceBuilder.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<WordDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.InternalServerError)]
         [SwaggerResponseExample((int)HttpStatusCode.InternalServerError, typeof(WordsInternalServerErrorResponseExample))]
-        public async Task<ActionResult<IEnumerable<WordDto>>> GetWords([FromQuery] WordTypeEnum wordTypeId, CancellationToken cancellationToken)
+        public async Task<ActionResult<IEnumerable<WordDto>>> GetWords([FromQuery, Required] WordTypeEnum wordTypeId, CancellationToken cancellationToken)
         {
             return await Mediator.Send(new GetWordsQuery()
             {

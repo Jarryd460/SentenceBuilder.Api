@@ -101,10 +101,13 @@ export class WordsService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getWords(wordTypeId?: WordTypeEnum, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<Array<WordDto>>;
-    public getWords(wordTypeId?: WordTypeEnum, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpResponse<Array<WordDto>>>;
-    public getWords(wordTypeId?: WordTypeEnum, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpEvent<Array<WordDto>>>;
-    public getWords(wordTypeId?: WordTypeEnum, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<any> {
+    public getWords(wordTypeId: WordTypeEnum, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<Array<WordDto>>;
+    public getWords(wordTypeId: WordTypeEnum, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpResponse<Array<WordDto>>>;
+    public getWords(wordTypeId: WordTypeEnum, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<HttpEvent<Array<WordDto>>>;
+    public getWords(wordTypeId: WordTypeEnum, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext}): Observable<any> {
+        if (wordTypeId === null || wordTypeId === undefined) {
+            throw new Error('Required parameter wordTypeId was null or undefined when calling getWords.');
+        }
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         if (wordTypeId !== undefined && wordTypeId !== null) {
