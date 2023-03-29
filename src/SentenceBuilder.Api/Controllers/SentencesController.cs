@@ -64,7 +64,7 @@ namespace SentenceBuilder.Api.Controllers
         /// <response code="415">When content type of request or response is not allowed</response>
         /// <response code="500">When something unexpected has happened</response>
         [HttpPost(Name = nameof(PostSentence))]
-        [ProducesResponseType(typeof(CreateSentenceDto), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(SentenceDto), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.BadRequest)]
         [SwaggerResponseExample((int)HttpStatusCode.BadRequest, typeof(BadRequestResponseExample))]
         [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.UnsupportedMediaType)]
