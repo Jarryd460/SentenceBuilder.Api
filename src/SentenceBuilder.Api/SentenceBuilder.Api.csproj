@@ -62,5 +62,25 @@
 		</Exec>
 		<Exec Command="openapi-generator-cli generate -i $(OutputPath)swagger.json -g typescript-angular -o $(SolutionDir)/src/SentenceBuilder.Api.Client.Sdk.TypescriptAngular --additional-properties packageName=SentenceBuilder.Api.Client.Sdk.TypescriptAngular,npmName=SentenceBuilder.Api.Client.Sdk.TypescriptAngular" />
 	</Target>
+	<ItemGroup>
+	  <None Update="HealthChecks.db">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HealthChecks.db-shm">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="HealthChecks.db-wal">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="SentenceBuilder.db">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="SentenceBuilder.db-shm">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="SentenceBuilder.db-wal">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>
