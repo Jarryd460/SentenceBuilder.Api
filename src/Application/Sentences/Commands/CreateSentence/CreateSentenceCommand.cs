@@ -5,6 +5,7 @@ using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Application.Sentences.Commands.CreateSentence;
 
@@ -17,11 +18,13 @@ public class CreateSentenceCommandHandler : IRequestHandler<CreateSentenceComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-    public CreateSentenceCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public CreateSentenceCommandHandler(IApplicationDbContext context, IMapper mapper, ILogger logger)
     {
         _context = context;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<SentenceDto> Handle(CreateSentenceCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,8 @@ public class CreateSentenceCommandHandler : IRequestHandler<CreateSentenceComman
         _context.Sentences.Add(entity);
 
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        _logger.Information("Sentence with Id {Id} has been created", entity.Id);
 
         return await _context.Sentences
             .AsNoTracking()

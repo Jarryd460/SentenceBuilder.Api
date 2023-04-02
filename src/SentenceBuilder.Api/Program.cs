@@ -11,12 +11,19 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SentenceBuilder.Api;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Net.Mime;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+Serilog.ILogger logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+builder.Logging.AddSerilog(logger);
+builder.Services.AddSingleton(logger);
 
 // Add services to the container.
 builder.Services.AddApplicationServices();

@@ -2,6 +2,7 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace Application.Sentences.Commands.DeleteSentence;
 
@@ -13,12 +14,12 @@ public record DeleteSentenceCommand : IRequest
 public class DeleteSentenceCommandHandler : IRequestHandler<DeleteSentenceCommand>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
-    public DeleteSentenceCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public DeleteSentenceCommandHandler(IApplicationDbContext context, IMapper mapper, ILogger logger)
     {
         _context = context;
-        _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task Handle(DeleteSentenceCommand request, CancellationToken cancellationToken)
@@ -29,6 +30,8 @@ public class DeleteSentenceCommandHandler : IRequestHandler<DeleteSentenceComman
         {
             _context.Sentences.Remove(sentence);
             await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            _logger.Information("Sentence with Id {Id} has been deleted", sentence.Id);
         }
     }
 }
